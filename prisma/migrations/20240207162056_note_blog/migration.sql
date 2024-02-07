@@ -1,4 +1,4 @@
--- CreateTable
+
 CREATE TABLE "BlogNote" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
