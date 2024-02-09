@@ -30,13 +30,20 @@ export class BlogApi implements BLogActions {
 
   getBlogsPosts(): void {
     this.fastify.get("/", async (request, response) => {
-      response.header("Access-Control-Allow-Origin", "*");
-      response.header("Access-Control-Allow-Methods", "GET");
+      response.headers({
+        "access-control-allow-methods": "GET, POST, PUT, DELETE",
+        "access-control-allow-origin": "*",
+      });
+
       return await this.prisma.blogNote.findMany();
     });
   }
   createBlogPost(createBlogPostSchema: BlogPostSchema): void {
     this.fastify.post("/blogs", {}, async (resquest, response) => {
+      response.headers({
+        "access-control-allow-methods": "GET, POST, PUT, DELETE",
+        "access-control-allow-origin": "*",
+      });
       const { title, note } = createBlogPostSchema.parse(resquest.body);
 
       try {
@@ -58,6 +65,10 @@ export class BlogApi implements BLogActions {
     idSchema: BlogPostIdSchema
   ): void {
     this.fastify.put("/edit/:id", async (request, response) => {
+      response.headers({
+        "access-control-allow-methods": "GET, POST, PUT, DELETE",
+        "access-control-allow-origin": "*",
+      });
       const { title, note } = updateBlogPostSchema.parse(request.body);
 
       const { id } = idSchema.parse(request.params);
@@ -78,6 +89,10 @@ export class BlogApi implements BLogActions {
   }
   deleteBlogPost(idSchema: BlogPostIdSchema): void {
     this.fastify.delete("/blog/:id", async (request, response) => {
+      response.headers({
+        "access-control-allow-methods": "GET, POST, PUT, DELETE",
+        "access-control-allow-origin": "*",
+      });
       const { id } = idSchema.parse(request.params);
       try {
         await this.prisma.blogNote.delete({
