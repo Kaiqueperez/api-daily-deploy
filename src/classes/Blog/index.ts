@@ -1,4 +1,6 @@
-import { FastifyInstance, fastify } from "fastify";
+import { FastifyInstance } from "fastify";
+
+import { fastifyCors } from "@fastify/cors";
 
 import {
   BLogActions,
@@ -14,6 +16,11 @@ export class BlogApi implements BLogActions {
   constructor(prismaInstace: PrismaClient, fastifyInstace: FastifyInstance) {
     this.prisma = prismaInstace;
     this.fastify = fastifyInstace;
+
+    this.fastify.register(fastifyCors, {
+      origin: "*",
+      methods: ["GET", "POST", "PUT", "DELETE"],
+    });
   }
 
   initializeListener() {
