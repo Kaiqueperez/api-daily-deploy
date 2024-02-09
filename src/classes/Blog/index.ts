@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, fastify } from "fastify";
 
 import {
   BLogActions,
@@ -29,7 +29,9 @@ export class BlogApi implements BLogActions {
   }
 
   getBlogsPosts(): void {
-    this.fastify.get("/", async () => {
+    this.fastify.get("/", async (request, response) => {
+      response.header("Access-Control-Allow-Origin", "*");
+      response.header("Access-Control-Allow-Methods", "GET");
       return await this.prisma.blogNote.findMany();
     });
   }
