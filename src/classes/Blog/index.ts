@@ -1,5 +1,5 @@
-import { FastifyInstance, fastify } from "fastify";
-
+import { FastifyInstance } from "fastify";
+import { fastifyCors } from "@fastify/cors";
 import {
   BLogActions,
   BlogPostIdSchema,
@@ -14,6 +14,11 @@ export class BlogApi implements BLogActions {
   constructor(prismaInstace: PrismaClient, fastifyInstace: FastifyInstance) {
     this.prisma = prismaInstace;
     this.fastify = fastifyInstace;
+
+    this.fastify.register(fastifyCors, {
+      origin: "*",
+      methods: ["GET", "POST", "PUT", "DELETE"],
+    });
   }
 
   initializeListener() {
@@ -29,29 +34,12 @@ export class BlogApi implements BLogActions {
   }
 
   getBlogsPosts(): void {
-    this.fastify.get("/", async (request, response) => {
-      request.headers = {
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      };
-      response.headers({
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      });
-
+    this.fastify.get("/", async () => {
       return await this.prisma.blogNote.findMany();
     });
   }
   createBlogPost(createBlogPostSchema: BlogPostSchema): void {
     this.fastify.post("/blogs", {}, async (request, response) => {
-      request.headers = {
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      };
-      response.headers({
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      });
       const { title, note } = createBlogPostSchema.parse(request.body);
 
       try {
@@ -73,14 +61,6 @@ export class BlogApi implements BLogActions {
     idSchema: BlogPostIdSchema
   ): void {
     this.fastify.put("/edit/:id", async (request, response) => {
-      request.headers = {
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      };
-      response.headers({
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      });
       const { title, note } = updateBlogPostSchema.parse(request.body);
 
       const { id } = idSchema.parse(request.params);
@@ -101,14 +81,6 @@ export class BlogApi implements BLogActions {
   }
   deleteBlogPost(idSchema: BlogPostIdSchema): void {
     this.fastify.delete("/blog/:id", async (request, response) => {
-      request.headers = {
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      };
-      response.headers({
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      });
       const { id } = idSchema.parse(request.params);
       try {
         await this.prisma.blogNote.delete({
