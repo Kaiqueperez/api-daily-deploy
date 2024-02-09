@@ -20,7 +20,7 @@ export class BlogApi implements BLogActions {
     this.fastify.listen(
       {
         host: "0.0.0.0",
-        port: process.env.PORT ? Number(process.env.PORT) : 3000,
+        port: process.env.PORT ? Number(process.env.PORT) : 3333,
       },
       () => {
         console.log("Server Running");
