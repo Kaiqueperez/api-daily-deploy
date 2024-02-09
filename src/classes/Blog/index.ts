@@ -30,6 +30,10 @@ export class BlogApi implements BLogActions {
 
   getBlogsPosts(): void {
     this.fastify.get("/", async (request, response) => {
+      request.headers = {
+        "access-control-allow-methods": "GET, POST, PUT, DELETE",
+        "access-control-allow-origin": "*",
+      };
       response.headers({
         "access-control-allow-methods": "GET, POST, PUT, DELETE",
         "access-control-allow-origin": "*",
@@ -39,12 +43,16 @@ export class BlogApi implements BLogActions {
     });
   }
   createBlogPost(createBlogPostSchema: BlogPostSchema): void {
-    this.fastify.post("/blogs", {}, async (resquest, response) => {
+    this.fastify.post("/blogs", {}, async (request, response) => {
+      request.headers = {
+        "access-control-allow-methods": "GET, POST, PUT, DELETE",
+        "access-control-allow-origin": "*",
+      };
       response.headers({
         "access-control-allow-methods": "GET, POST, PUT, DELETE",
         "access-control-allow-origin": "*",
       });
-      const { title, note } = createBlogPostSchema.parse(resquest.body);
+      const { title, note } = createBlogPostSchema.parse(request.body);
 
       try {
         await this.prisma.blogNote.create({
@@ -65,6 +73,10 @@ export class BlogApi implements BLogActions {
     idSchema: BlogPostIdSchema
   ): void {
     this.fastify.put("/edit/:id", async (request, response) => {
+      request.headers = {
+        "access-control-allow-methods": "GET, POST, PUT, DELETE",
+        "access-control-allow-origin": "*",
+      };
       response.headers({
         "access-control-allow-methods": "GET, POST, PUT, DELETE",
         "access-control-allow-origin": "*",
@@ -89,6 +101,10 @@ export class BlogApi implements BLogActions {
   }
   deleteBlogPost(idSchema: BlogPostIdSchema): void {
     this.fastify.delete("/blog/:id", async (request, response) => {
+      request.headers = {
+        "access-control-allow-methods": "GET, POST, PUT, DELETE",
+        "access-control-allow-origin": "*",
+      };
       response.headers({
         "access-control-allow-methods": "GET, POST, PUT, DELETE",
         "access-control-allow-origin": "*",
