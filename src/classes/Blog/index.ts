@@ -1,15 +1,9 @@
 import { FastifyInstance } from "fastify";
-
 import { fastifyCors } from "@fastify/cors";
-
-import {
-  BLogActions,
-  BlogPostIdSchema,
-  BlogPostSchema,
-} from "../../types/crudMethods";
 import { PrismaClient } from "@prisma/client";
+import { createBlogSchema, idSchema } from "../../schemas";
 
-export class BlogApi implements BLogActions {
+export class BlogApi {
   prisma: PrismaClient;
   fastify: FastifyInstance;
 
@@ -21,45 +15,24 @@ export class BlogApi implements BLogActions {
       origin: "*",
       methods: ["GET", "POST", "PUT", "DELETE"],
     });
+    this.setupRoutes();
   }
 
-  initializeListener() {
-    this.fastify.listen(
-      {
-        host: "0.0.0.0",
-        port: process.env.PORT ? Number(process.env.PORT) : 3333,
-      },
-      () => {
-        console.log("Server Running");
-      }
-    );
+  private setupRoutes() {
+    this.getBlogsPosts();
+    this.createBlogPost();
+    this.updateBlogPost();
+    this.deleteBlogPost();
   }
 
-  getBlogsPosts(): void {
-    this.fastify.get("/", async (request, response) => {
-      request.headers = {
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      };
-      response.headers({
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      });
-
+  private getBlogsPosts(): void {
+    this.fastify.get("/", async () => {
       return await this.prisma.blogNote.findMany();
     });
   }
-  createBlogPost(createBlogPostSchema: BlogPostSchema): void {
+  private createBlogPost(): void {
     this.fastify.post("/blogs", {}, async (request, response) => {
-      request.headers = {
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      };
-      response.headers({
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      });
-      const { title, note } = createBlogPostSchema.parse(request.body);
+      const { title, note } = createBlogSchema.parse(request.body);
 
       try {
         await this.prisma.blogNote.create({
@@ -69,26 +42,15 @@ export class BlogApi implements BLogActions {
           },
         });
 
-        return response.code(201).send("blog created");
+        return response.code(201).send(`your blog ${title} is created`);
       } catch (error) {
         console.log(error);
       }
     });
   }
-  updateBlogPost(
-    updateBlogPostSchema: BlogPostSchema,
-    idSchema: BlogPostIdSchema
-  ): void {
+  private updateBlogPost(): void {
     this.fastify.put("/edit/:id", async (request, response) => {
-      request.headers = {
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      };
-      response.headers({
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      });
-      const { title, note } = updateBlogPostSchema.parse(request.body);
+      const { title, note } = createBlogSchema.parse(request.body);
 
       const { id } = idSchema.parse(request.params);
 
@@ -106,16 +68,8 @@ export class BlogApi implements BLogActions {
       } catch (error) {}
     });
   }
-  deleteBlogPost(idSchema: BlogPostIdSchema): void {
+  private deleteBlogPost(): void {
     this.fastify.delete("/blog/:id", async (request, response) => {
-      request.headers = {
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      };
-      response.headers({
-        "access-control-allow-methods": "GET, POST, PUT, DELETE",
-        "access-control-allow-origin": "*",
-      });
       const { id } = idSchema.parse(request.params);
       try {
         await this.prisma.blogNote.delete({
@@ -129,5 +83,17 @@ export class BlogApi implements BLogActions {
         response.send(error);
       }
     });
+  }
+
+  initializeListener() {
+    this.fastify.listen(
+      {
+        host: "0.0.0.0",
+        port: process.env.PORT ? Number(process.env.PORT) : 3333,
+      },
+      () => {
+        console.log("Server Running");
+      }
+    );
   }
 }
