@@ -34,6 +34,13 @@ export class BlogApi {
     this.fastify.post("/blogs", {}, async (request, response) => {
       const { title, note } = createBlogSchema.parse(request.body);
 
+      if (title.trim() === "" || note.trim() === "") {
+        return response.code(400).send({
+          code: response.statusCode,
+          body: request.body,
+          message: "Os campos title e note não podem ser enviados vazio",
+        });
+      }
       try {
         await this.prisma.blogNote.create({
           data: {
@@ -49,7 +56,7 @@ export class BlogApi {
     });
   }
   private updateBlogPost(): void {
-    this.fastify.put("/edit/:id", async (request, response) => {
+    this.fastify.put("/post/:id", async (request, response) => {
       const { title, note } = createBlogSchema.parse(request.body);
 
       const { id } = idSchema.parse(request.params);
